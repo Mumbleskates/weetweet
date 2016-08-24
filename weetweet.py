@@ -95,8 +95,6 @@ script_options = {
     "tweet_nicks": True,
 }
 
-# TODO have a dict for each buffer
-tweet_dict = {'cur_index': "a0"}
 # Mega command dict
 command_dict = dict(
     user="u",
@@ -210,30 +208,38 @@ def html_escape(text):
     return "".join(html_escape_table.get(c, c) for c in text)
 
 
-def dict_tweet(tweet_id):
-    cur_index = tweet_dict['cur_index']
-    if tweet_id not in tweet_dict.values():
-        if cur_index == 'z9':
-            cur_index = 'a0'
+def _tweet_id_gen():
+    """Looping generator for user-friendly tweet IDs"""
+    letters = 'abcdefghijklmnopqrstuvwxyz'
+    numbers = '0123456789'
+    from itertools import product
+    while True:
+        yield from product(letters, numbers)
+        yield from product(numbers, letters)
+# TODO have a dict for each buffer
+tweet_id_gen = _tweet_id_gen()
 
-        if cur_index[1] == '9':
-            cur_index = chr(ord(cur_index[0]) + 1) + '0'
-        else:
-            cur_index = cur_index[0] + chr(ord(cur_index[1]) + 1)
+tweet_dict = {}  # dictionary of user-friendly tweet id to twitter post id
+tweet_dict_invert = {}  # upside down version of tweet_dict
 
-        tweet_dict[cur_index] = tweet_id
-        tweet_dict['cur_index'] = cur_index
-        return cur_index
-    else:
-        for index, t_id in tweet_dict.items():
-            if t_id == tweet_id:
-                return index
+
+def dict_tweet(twitter_post_id):
+    """given a twitter post ID, return a short ID that represents this tweet for the user"""
+    if twitter_post_id in tweet_dict_invert:  # we alread have this one stored
+        return tweet_dict_invert[twitter_post_id]  # return the extant short-id
+    else:  # store this and return its new id
+        short_id = next(tweet_id_gen)
+        tweet_dict_invert.pop(tweet_dict.get(short_id), None)  # we're overwriting this one if ids have looped
+        tweet_dict[short_id] = twitter_post_id
+        tweet_dict_invert[twitter_post_id] = short_id
+        return short_id
 
 
 def read_config():
     for item in script_options:
         script_options[item] = weechat.config_string(
-            weechat.config_get("plugins.var.python." + SCRIPT_NAME + "." + item))
+            weechat.config_get("plugins.var.python." + SCRIPT_NAME + "." + item)
+        )
     for item in ["auth_complete", "print_id", "alt_rt_style", "home_replies", "tweet_nicks"]:
         # Convert to bool
         script_options[item] = weechat.config_string_to_boolean(script_options[item])
@@ -283,14 +289,12 @@ def print_tweet_data(buffer, tweets, data):
         else:
             t_id = ''
 
-        if len(message) == 5:
+        if len(message) == 5:  # TODO: this is worryingly arbitrary
             # This is a reply to a tweet
             arrow_col = weechat.color('chat_prefix_suffix')
             reset_col = weechat.color('reset')
             reply_id = arrow_col + "<" + reset_col + dict_tweet(message[4]) + arrow_col + "> " + reset_col
-            temp_text = text
-            text = reply_id
-            reply_id = temp_text
+            text, reply_id = reply_id, text  # why are these being switched again? unclear.
 
         weechat.prnt_date_tags(
             buffer, message[0], "notify_message",
