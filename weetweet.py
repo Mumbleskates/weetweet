@@ -276,10 +276,21 @@ def parse_for_nicks(text, buffer):
         add_to_nicklist(buffer, nick, tweet_nicks_group[buffer])
 
 
+def colorize_tweet_text(text):
+    """replace @mentions in text with the same thing but colorized"""
+    def colorize(match):
+        return "{0}{1}{2}".format(
+            weechat.info_get('irc_nick_color', match.group(1)),
+            match.string,
+            COLOR_RESET
+        )
+    return re.sub(r"@(\w+)", colorize, text)
+
+
 def print_tweet_data(buffer, tweets, data):
     for message in tweets:
         nick = message[1]
-        text = message[3]
+        text = colorize_tweet_text(message[3])
         nick_color = weechat.info_get('irc_nick_color', nick)
         reply_id = ""
         if script_options['tweet_nicks']:
