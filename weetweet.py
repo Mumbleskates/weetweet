@@ -272,19 +272,27 @@ def remove_from_nicklist(buf, nick, group=""):
 
 def parse_for_nicks(text, buffer):
     # Parse text for twitter nicks and add them to nicklist
-    for nick in re.findall(r"(?<!\S)@(\w+)", text):
+    for nick in re.findall(r"\B@(\w+)", text):
         add_to_nicklist(buffer, nick, tweet_nicks_group[buffer])
 
 
 def colorize_tweet_text(text):
     """replace @mentions in text with the same thing but colorized"""
     def colorize(match):
-        return "{0}{1}{2}".format(
-            weechat.info_get('irc_nick_color', match.group(1)),
-            match.group(0),
-            COLOR_RESET
-        )
-    return re.sub(r"(?<!\S)@(\w+)", colorize, text)
+        """colorize normalized (lowercased) @mentions and hashtags"""
+        if match.group(1):  # matched an @mention: colorize the whole substring
+            return "{0}{1}{2}".format(
+                weechat.info_get('irc_nick_color', match.group(1).lower()),
+                match.group(0),
+                COLOR_RESET
+            )
+        else:  # hashtags: only colorize the # character
+            return "{0}#{1}{2}".format(
+                weechat.info_get('irc_nick_color', match.group(2).lower()),
+                COLOR_RESET,
+                match.group(0)
+            )
+    return re.sub(r"\B@(\w+)|#(\w*[a-zA-Z]+\w*)", colorize, text)
 
 
 def print_tweet_data(buffer, tweets, data):
