@@ -595,12 +595,12 @@ def create_stream(name, args=""):
                    stream_args=args)
 
     proc_hooks[name] = weechat.hook_process(
-        'python3 {0} {1} {2} stream {3} {4}'.format(
+        'python3 {0} {1} {2} stream {3} "{4}"'.format(
             SCRIPT_FILE_PATH,
             script_options['oauth_token'],
             script_options['oauth_secret'],
             file_name,
-            repr(options),
+            options,
         ),
         0, 'my_process_cb', str([buffer, "Stream"])
     )
