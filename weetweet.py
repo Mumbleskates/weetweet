@@ -290,7 +290,7 @@ def colorize_tweet_text(text):
             return "{0}#{1}{2}".format(
                 weechat.info_get('irc_nick_color', match.group(2).lower()),
                 COLOR_RESET,
-                match.group(0)
+                match.group(2)
             )
     return re.sub(r"\B@(\w+)|#(\w*[a-zA-Z]+\w*)", colorize, text)
 
