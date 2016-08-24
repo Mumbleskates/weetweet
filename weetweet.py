@@ -43,11 +43,10 @@ required_twitter_version = "1.14.1"
 # constant for maximum number of
 MAX_REQUEST_LIMIT = 200
 
-COLOR_RESET = weechat.color('reset')
-
 
 try:
     import weechat
+    COLOR_RESET = weechat.color('reset')
 except ImportError:
     # import html parser so we can convert html strings to plain text
     try:
