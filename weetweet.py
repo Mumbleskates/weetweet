@@ -259,14 +259,14 @@ def add_to_nicklist(buf, nick, group=""):
     """Add nick to the nicklist."""
     if group == "":
         group = friends_nicks_group[buf]
-    weechat.nicklist_add_nick(buf, group, nick, 'bar_fg', '', '', 1)
+    weechat.nicklist_add_nick(buf, group, "@" + nick, 'bar_fg', '', '', 1)
 
 
 def remove_from_nicklist(buf, nick, group=""):
     """Remove nick from the nicklist."""
     if group == "":
         group = friends_nicks_group[buf]
-    nick_ptr = weechat.nicklist_search_nick(buf, group, nick)
+    nick_ptr = weechat.nicklist_search_nick(buf, group, "@" + nick)
     weechat.nicklist_remove_nick(buf, nick_ptr)
 
 
