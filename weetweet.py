@@ -50,8 +50,7 @@ try:
 except ImportError:
     # import html parser so we can convert html strings to plain text
     try:
-        import html
-        import html.parser
+        from html import unescape as html_unescape
     except:
         print("You need to have python3 installed to run this script!")
         exit(0)
@@ -273,7 +272,7 @@ def remove_from_nicklist(buf, nick, group=""):
 
 def parse_for_nicks(text, buffer):
     # Parse text for twitter nicks and add them to nicklist
-    for nick in re.findall(r"@(\w+)", text):
+    for nick in re.findall(r"(?<!\S)@(\w+)", text):
         add_to_nicklist(buffer, nick, tweet_nicks_group[buffer])
 
 
@@ -285,7 +284,7 @@ def colorize_tweet_text(text):
             match.group(0),
             COLOR_RESET
         )
-    return re.sub(r"@(\w+)", colorize, text)
+    return re.sub(r"(?<!\S)@(\w+)", colorize, text)
 
 
 def print_tweet_data(buffer, tweets, data):
@@ -348,7 +347,7 @@ def trim_tweet_data(tweet_data, screen_name, alt_rt_style):
                     message['id_str'],
                     # convert text to bytes so python2 can read it correctly
                     # TODO remove the encode when weechat is running python3 as default
-                    html.unescape(message['text']).encode('utf-8')]
+                    html_unescape(message['text']).encode('utf-8')]
         if message["in_reply_to_status_id_str"] is not None:
             mes_list.append(message["in_reply_to_status_id_str"])
 
@@ -479,7 +478,6 @@ def twitter_stream(cmd_args):
                 else:
                     tweet_iter = stream.user()
             else:
-                h = html.parser.HTMLParser()
                 args = stream_args.split(" & ")
                 stream = TwitterStream(auth=OAuth(
                     oauth_token, oauth_secret, CONSUMER_KEY, CONSUMER_SECRET),
@@ -489,19 +487,19 @@ def twitter_stream(cmd_args):
                     oauth_token, oauth_secret, CONSUMER_KEY, CONSUMER_SECRET))
 
                 if args[0] != "":
-                    follow = ",".join(h.unescape(args[0]).split())
+                    follow = ",".join(html_unescape(args[0]).split())
                     twitter_data = twitter.users.lookup(screen_name=follow)
                     follow_ids = ""
                     for user in twitter_data:
                         follow_ids += user['id_str'] + ","
                     follow_ids = follow_ids[:-1]
                     if len(args) == 2 and args[1] != "":
-                        track = ",".join(h.unescape(args[1]).split())
+                        track = ",".join(html_unescape(args[1]).split())
                         tweet_iter = stream.statuses.filter(track=track, follow=follow_ids)
                     else:
                         tweet_iter = stream.statuses.filter(follow=follow_ids)
                 else:
-                    track = ",".join(h.unescape(args[1]).split())
+                    track = ",".join(html_unescape(args[1]).split())
                     tweet_iter = stream.statuses.filter(track=track)
         except Exception as ex:
             stream_end_message = "Connection problem (could not connect to twitter): {0}".format(ex)
@@ -716,8 +714,6 @@ def get_twitter_data(cmd_args):
     alt_rt_style = False
     screen_name = ""
 
-    h = html.parser.HTMLParser()
-
     try:
         if cmd_args[-1][0] == "[":
             option_list = ast.literal_eval(cmd_args[-1])
@@ -810,11 +806,11 @@ def get_twitter_data(cmd_args):
         elif cmd_args[3] == "t":
             # returns the tweet that was sent (not a list(dict) just a dict)
             # make it into a list so we don't have to write special cases for this
-            tweet_data = [twitter.statuses.update(status=h.unescape(cmd_args[4]))]
+            tweet_data = [twitter.statuses.update(status=html_unescape(cmd_args[4]))]
             # The home stream prints you messages as well...
             tweet_data = []
         elif cmd_args[3] == "re":
-            tweet_data = [twitter.statuses.update(status=h.unescape(cmd_args[5]),
+            tweet_data = [twitter.statuses.update(status=html_unescape(cmd_args[5]),
                                                   in_reply_to_status_id=cmd_args[4])]
             # The home stream prints you messages as well...
             tweet_data = []
