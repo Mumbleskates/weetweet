@@ -216,8 +216,10 @@ def _tweet_id_gen():
     numbers = '0123456789'
     from itertools import product
     while True:
-        yield from product(letters, numbers)
-        yield from product(numbers, letters)
+        for name in product(letters, numbers):
+            yield name
+        for name in product(numbers, letters):
+            yield name
 # TODO have a dict for each buffer
 tweet_id_gen = _tweet_id_gen()
 
