@@ -277,6 +277,7 @@ def print_tweet_data(buffer, tweets, data):
     for message in tweets:
         nick = message[1]
         text = message[3]
+        nick_color = weechat.info_get('irc_nick_color', nick)
         reply_id = ""
         if script_options['tweet_nicks']:
             parse_for_nicks(text, buffer)
@@ -298,7 +299,7 @@ def print_tweet_data(buffer, tweets, data):
 
         weechat.prnt_date_tags(
             buffer, message[0], "notify_message",
-            "{0}{1}\t{2}{3}".format(nick, t_id, text, reply_id)
+            "{0}{1}{2}\t{3}{4}".format(nick_color, nick, t_id, text, reply_id)
         )
 
     if data == "id":
