@@ -1151,12 +1151,11 @@ def tweet_length(message):
     """Replace URLs with placeholders, 20 for http URLs, 21 for https."""
     # regexes to match URLs
     octet = r'(?:2(?:[0-4]\d|5[0-5])|1\d\d|\d{1,2})'
-    ip_addr = r'%s(?:\.%s){3}' % (octet, octet)
+    ip_addr = r'{0}(?:\.{0}){{3}}'.format(octet)
     # Base domain regex off RFC 1034 and 1738
     label = r'[0-9a-z][-0-9a-z]*[0-9a-z]?'
-    domain = r'%s(?:\.%s)*\.[a-z][-0-9a-z]*[a-z]?' % (label, label)
-    url_re = re.compile(r'(\w+://(?:%s|%s)(?::\d+)?(?:/[^\])>\s]*)?)' % \
-                        (domain, ip_addr), re.I)
+    domain = r'{0}(?:\.{0})*\.[a-z][-0-9a-z]*[a-z]?'.format(label)
+    url_re = re.compile(r'(\w+://(?:{0}|{1})(?::\d+)?(?:/[^\])>\s]*)?)'.format(domain, ip_addr), re.I)
 
     new_message = message
 
@@ -1194,7 +1193,7 @@ def my_modifier_cb(data, modifier, modifier_data, string):
 def parse_oauth_tokens(result):
     for r in result.split('&'):
         k, v = r.split('=')
-        if k == 'oauth_token':
+        if k == 'oauth_token':  # TODO: what if these aren't present?
             oauth_token = v
         elif k == 'oauth_token_secret':
             oauth_token_secret = v
@@ -1206,8 +1205,9 @@ def oauth_proc_cb(data, command, rc, out, err):
     buffer = twit_buf
 
     if rc == weechat.WEECHAT_HOOK_PROCESS_ERROR:
-        weechat.prnt("", "Error with command '%s'" %
-                     command.replace(script_options["oauth_token"], "").replace(script_options["oauth_secret"], ""))
+        weechat.prnt("", "Error with command '{0}'".format(
+            command.replace(script_options["oauth_token"], "").replace(script_options["oauth_secret"], "")
+        ))
         return weechat.WEECHAT_RC_OK
 
     if len(out) > 16 and out[:16] == "Unexpected error":
@@ -1262,9 +1262,11 @@ def oauth_proc_cb(data, command, rc, out, err):
             weechat.config_set_plugin('auth_complete', "on")
             weechat.prnt(buffer, " Done! now you can begin using this script!")
             # TODO: clean up all these horrifying hook_process calls
-            weechat.hook_process("python3 " + SCRIPT_FILE_PATH + " " +
-                                 script_options["oauth_token"] + " " + script_options["oauth_secret"] + " " +
-                                 "settings []", 10 * 1000, "oauth_proc_cb", "nick")
+            weechat.hook_process(
+                "python3 " + SCRIPT_FILE_PATH + " " +
+                script_options["oauth_token"] + " " + script_options["oauth_secret"] + " " +
+                "settings []", 10 * 1000, "oauth_proc_cb", "nick"
+            )
     return weechat.WEECHAT_RC_OK
 
 
@@ -1272,13 +1274,17 @@ def oauth_dance(buffer, pin=""):
     # Auth the twitter client
     if pin == "":
         weechat.prnt(buffer, "Hi there! We're gonna get you all set up to use this plugin.")
-        weechat.hook_process("python3 " + SCRIPT_FILE_PATH + " " + "'' " + "'' " +
-                             "auth", 10 * 1000, "oauth_proc_cb", "auth1")
+        weechat.hook_process(
+            "python3 {0} '' '' auth".format(SCRIPT_FILE_PATH),
+            10 * 1000, "oauth_proc_cb", "auth1"
+        )
     else:
         oauth_verifier = pin.strip()
-        weechat.hook_process("python3 " + SCRIPT_FILE_PATH + " " +
-                             script_options["oauth_token"] + " " + script_options["oauth_secret"] + " " +
-                             "auth " + oauth_verifier, 10 * 1000, "oauth_proc_cb", "auth2")
+        weechat.hook_process(
+            "python3 " + SCRIPT_FILE_PATH + " " +
+            script_options["oauth_token"] + " " + script_options["oauth_secret"] + " " +
+            "auth " + oauth_verifier, 10 * 1000, "oauth_proc_cb", "auth2"
+        )
 
 
 def setup_buffer(buffer):
@@ -1289,13 +1295,16 @@ def setup_buffer(buffer):
     weechat.buffer_set(buffer, "localvar_set_no_log", "1")
 
     # create main nicklist
-    friends_nicks_group[buffer] = weechat.nicklist_add_group(buffer, "", "Friends",
-                                                             "weechat.color.nicklist_group", 1)
+    friends_nicks_group[buffer] = weechat.nicklist_add_group(
+        buffer, "", "Friends", "weechat.color.nicklist_group", 1
+    )
 
-    tweet_nicks_group[buffer] = weechat.nicklist_add_group(buffer, "", "Tweet_parse",
-                                                           "weechat.color.nicklist_group", 1)
-    autocomp_group = weechat.nicklist_add_group(buffer, "", "Autocomp",
-                                                "weechat.color.nicklist_group", 1)
+    tweet_nicks_group[buffer] = weechat.nicklist_add_group(
+        buffer, "", "Tweet_parse", "weechat.color.nicklist_group", 1
+    )
+    autocomp_group = weechat.nicklist_add_group(
+        buffer, "", "Autocomp", "weechat.color.nicklist_group", 1
+    )
     # newline autocomplete
     weechat.nicklist_add_nick(buffer, autocomp_group, "&#13;&#10;", 'bar_fg', '', '', 1)
 
@@ -1315,16 +1324,20 @@ def finish_init():
     buffer = twit_buf
 
     if script_options['screen_name'] == "":
-        weechat.hook_process("python3 " + SCRIPT_FILE_PATH + " " +
-                             script_options["oauth_token"] + " " + script_options["oauth_secret"] + " " +
-                             "settings []", 10 * 1000, "oauth_proc_cb", "nick")
+        weechat.hook_process(
+            "python3 " + SCRIPT_FILE_PATH + " " +
+            script_options["oauth_token"] + " " + script_options["oauth_secret"] + " " +
+            "settings []", 10 * 1000, "oauth_proc_cb", "nick"
+        )
         return
     setup_buffer(buffer)
 
     # Add friends to nick list and print new tweets
-    weechat.hook_process("python3 " + SCRIPT_FILE_PATH + " " +
-                         script_options["oauth_token"] + " " + script_options["oauth_secret"] + " " +
-                         "f " + script_options['screen_name'] + " []", 10 * 1000, "oauth_proc_cb", "friends")
+    weechat.hook_process(
+        "python3 " + SCRIPT_FILE_PATH + " " +
+        script_options["oauth_token"] + " " + script_options["oauth_secret"] + " " +
+        "f " + script_options['screen_name'] + " []", 10 * 1000, "oauth_proc_cb", "friends"
+    )
 
 
 def main():
