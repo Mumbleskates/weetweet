@@ -49,6 +49,7 @@ try:
 except ImportError:
     # import html parser so we can convert html strings to plain text
     try:
+        import html
         import html.parser
     except:
         print("You need to have python3 installed to run this script!")
@@ -315,8 +316,6 @@ def trim_tweet_data(tweet_data, screen_name, alt_rt_style):
     # a small subset of it. This also prevents the output buffer from overflowing when fetching many tweets
     # at once.
 
-    h = html.parser.HTMLParser()
-
     output = []
     for message in tweet_data:
         if message.get('retweeted_status'):
@@ -335,8 +334,8 @@ def trim_tweet_data(tweet_data, screen_name, alt_rt_style):
                     message['id_str'],
                     # convert text to bytes so python2 can read it correctly
                     # TODO remove the encode when weechat is running python3 as default
-                    h.unescape(message['text']).encode('utf-8')]
-        if message["in_reply_to_status_id_str"] != None:
+                    html.unescape(message['text']).encode('utf-8')]
+        if message["in_reply_to_status_id_str"] is not None:
             mes_list.append(message["in_reply_to_status_id_str"])
 
         output.append(mes_list)
@@ -1263,9 +1262,10 @@ def oauth_proc_cb(data, command, rc, out, err):
             weechat.prnt(buffer, " Done! now you can begin using this script!")
             # TODO: clean up all these horrifying hook_process calls
             weechat.hook_process(
-                "python3 " + SCRIPT_FILE_PATH + " " +
-                script_options["oauth_token"] + " " + script_options["oauth_secret"] + " " +
-                "settings []", 10 * 1000, "oauth_proc_cb", "nick"
+                "python3 {0} {oauth_token} {oauth_secret} settings []".format(
+                    SCRIPT_FILE_PATH, **script_options
+                ),
+                10 * 1000, "oauth_proc_cb", "nick"
             )
     return weechat.WEECHAT_RC_OK
 
