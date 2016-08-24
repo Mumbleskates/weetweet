@@ -43,6 +43,8 @@ required_twitter_version = "1.14.1"
 # constant for maximum number of
 MAX_REQUEST_LIMIT = 200
 
+COLOR_RESET = weechat.color('reset')
+
 
 try:
     import weechat
@@ -285,14 +287,14 @@ def print_tweet_data(buffer, tweets, data):
             add_to_nicklist(buffer, nick, tweet_nicks_group[buffer])
 
         if script_options['print_id']:
-            t_id = weechat.color('reset') + ' ' + dict_tweet(message[2])
+            t_id = COLOR_RESET + ' ' + dict_tweet(message[2])
         else:
             t_id = ''
 
         if len(message) == 5:  # TODO: this is worryingly arbitrary
             # This is a reply to a tweet
             arrow_col = weechat.color('chat_prefix_suffix')
-            reset_col = weechat.color('reset')
+            reset_col = COLOR_RESET
             reply_id = arrow_col + "<" + reset_col + dict_tweet(message[4]) + arrow_col + "> " + reset_col
             text, reply_id = reply_id, text  # why are these being switched again? unclear.
 
@@ -348,7 +350,7 @@ def stream_message(buffer, tweet):
     if 'delete' in tweet:
         # Colorize the tweet id
         arrow_col = weechat.color('chat_prefix_suffix')
-        reset_col = weechat.color('reset')
+        reset_col = COLOR_RESET
         dict_id = dict_tweet(tweet['delete']['status']['id_str'])
         id_str = arrow_col + "<" + reset_col + dict_id + arrow_col + "> " + reset_col
         weechat.prnt(buffer, "{0}Got request to delete: {1}".format(weechat.prefix("network"), id_str))
@@ -365,7 +367,7 @@ def stream_message(buffer, tweet):
         if 'target_object' in tweet:
             if 'id_str' in tweet['target_object']:
                 arrow_col = weechat.color('chat_prefix_suffix')
-                reset_col = weechat.color('reset')
+                reset_col = COLOR_RESET
                 dict_id = dict_tweet(tweet['target_object']['id_str'])
                 extra_str = "'s tweet " + arrow_col + "<" + reset_col + dict_id + arrow_col + "> " + reset_col
 
@@ -1112,7 +1114,7 @@ def hook_commands_and_completions():
     for command in sorted(command_dict):
         compl_list.append(command)
         com_list.append(command + weechat.color("*red") + " or " +
-                        weechat.color('reset') + command_dict[command] + "\n")
+                        COLOR_RESET + command_dict[command] + "\n")
         desc_list.append(weechat.color("chat_nick_other") + command + ":    \n" + desc_dict[command])
     weechat.hook_command(
         "twitter", "Command to interact with the twitter api/plugin", " | ".join(com_list),
