@@ -490,8 +490,8 @@ def twitter_stream(cmd_args):
                 else:
                     track = ",".join(h.unescape(args[1]).split())
                     tweet_iter = stream.statuses.filter(track=track)
-        except:
-            stream_end_message = "Connection problem (could not connect to twitter)"
+        except Exception as ex:
+            stream_end_message = "Connection problem (could not connect to twitter): {0}".format(ex)
             break
 
         stream_end_message = "Unknown reason"
