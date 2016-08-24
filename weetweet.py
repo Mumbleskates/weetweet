@@ -594,7 +594,7 @@ def my_process_cb(data, command, rc, out, err):
                                                                                                process_output['followers_count'],
                                                                                                process_output['favourites_count'],
                                                                                                process_output['statuses_count']))
-            weechat.prnt(buffer, "Are you currently following this person: %s" % (process_output['following']))
+            weechat.prnt(buffer, "You are {}currently following this person".format("not " * (not process_output['following'])))
             return weechat.WEECHAT_RC_OK
 
         elif end_mes == "Stream":
