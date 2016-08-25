@@ -1362,7 +1362,6 @@ def main():
     global twit_buf
 
     weechat.register(SCRIPT_NAME, "DarkDefender", "1.2.4", "GPL3", "Weechat twitter client", "", "")
-    weechat.prnt("", "weechat version is " + repr(weechat.info_get('version')))
 
     if not import_ok:
         weechat.prnt("", "Can't load twitter python lib >= " + required_twitter_version)
@@ -1402,6 +1401,8 @@ def main():
                 'You have to register this plugin with twitter for it to work.\n'
                 'Type ":auth" and follow the instructions to do that'
             )
+
+    weechat.prnt("", "weechat version is " + repr(weechat.info_get('version')))
 
 
 if __name__ == "__main__" and weechat_call:
