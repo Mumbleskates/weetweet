@@ -299,7 +299,7 @@ def print_tweet_data(buffer, tweets, data):
     for message in tweets:
         nick = message[1]
         text = colorize_tweet_text(message[3])
-        nick_color = weechat.info_get('irc_nick_color', nick)
+        nick_color = weechat.info_get('irc_nick_color', nick.lower())
         reply_id = ""
         if script_options['tweet_nicks']:
             parse_for_nicks(text, buffer)
