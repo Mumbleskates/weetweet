@@ -282,13 +282,13 @@ def colorize_tweet_text(text):
         """colorize normalized (lowercased) @mentions and hashtags"""
         if match.group(1):  # matched an @mention: colorize the whole substring
             return "{0}{1}{2}".format(
-                weechat.info_get('irc_nick_color', match.group(1).lower()),
+                weechat.info_get('nick_color', match.group(1).lower()),
                 match.group(0),
                 COLOR_RESET
             )
         else:  # hashtags: only colorize the # character
             return "{0}#{1}{2}".format(
-                weechat.info_get('irc_nick_color', match.group(2).lower()),
+                weechat.info_get('nick_color', match.group(2).lower()),
                 COLOR_RESET,
                 match.group(2)
             )
@@ -299,7 +299,7 @@ def print_tweet_data(buffer, tweets, data):
     for message in tweets:
         nick = message[1]
         text = colorize_tweet_text(message[3])
-        nick_color = weechat.info_get('irc_nick_color', nick.lower())
+        nick_color = weechat.info_get('nick_color', nick.lower())
         reply_id = ""
         if script_options['tweet_nicks']:
             parse_for_nicks(text, buffer)
@@ -826,7 +826,7 @@ def get_twitter_data(cmd_args):
             tweet_data = twitter.statuses.home_timeline(since_id=cmd_args[4], count=MAX_REQUEST_LIMIT,
                                                         exclude_replies=no_home_replies)
             if tweet_data == []:
-                return "No new tweets available."
+                return "No new tweets available. Weechat version is " + repr(weechat.info_get('version'))
         elif cmd_args[3] == "follow":
             tweet_data = []
             twitter.friendships.create(screen_name=cmd_args[4])
