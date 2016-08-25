@@ -1402,7 +1402,8 @@ def main():
                 'Type ":auth" and follow the instructions to do that'
             )
 
-    weechat.prnt("", "weechat version is " + repr(weechat.info_get('version', "")))
+    weechat.prnt("", "weechat version is " + repr(weechat.info_get('version', "")) + ", numeric " + repr(
+        weechat.info_get('version_number', "")))
 
 
 if __name__ == "__main__" and weechat_call:
