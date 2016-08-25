@@ -47,7 +47,7 @@ MAX_REQUEST_LIMIT = 200
 try:
     import weechat
     COLOR_RESET = weechat.color('reset')
-    weechat.prnt("", "weechat version is " + repr(weechat.info_get('version')))
+    weechat.prnt("", "weechat version is " + repr(weechat.info_get('version_number')))
 except ImportError:
     # import html parser so we can convert html strings to plain text
     try:
