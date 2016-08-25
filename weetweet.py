@@ -47,7 +47,6 @@ MAX_REQUEST_LIMIT = 200
 try:
     import weechat
     COLOR_RESET = weechat.color('reset')
-    weechat.prnt("", "weechat version is " + repr(weechat.info_get('version_number')))
 except ImportError:
     # import html parser so we can convert html strings to plain text
     try:
@@ -1363,6 +1362,7 @@ def main():
     global twit_buf
 
     weechat.register(SCRIPT_NAME, "DarkDefender", "1.2.4", "GPL3", "Weechat twitter client", "", "")
+    weechat.prnt("", "weechat version is " + repr(weechat.info_get('version')))
 
     if not import_ok:
         weechat.prnt("", "Can't load twitter python lib >= " + required_twitter_version)
