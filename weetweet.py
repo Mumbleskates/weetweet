@@ -47,6 +47,7 @@ MAX_REQUEST_LIMIT = 200
 try:
     import weechat
     COLOR_RESET = weechat.color('reset')
+    weechat.prnt("", "weechat version is " + repr(weechat.info_get('version')))
 except ImportError:
     # import html parser so we can convert html strings to plain text
     try:
@@ -826,7 +827,7 @@ def get_twitter_data(cmd_args):
             tweet_data = twitter.statuses.home_timeline(since_id=cmd_args[4], count=MAX_REQUEST_LIMIT,
                                                         exclude_replies=no_home_replies)
             if tweet_data == []:
-                return "No new tweets available. Weechat version is " + repr(weechat.info_get('version'))
+                return "No new tweets available."
         elif cmd_args[3] == "follow":
             tweet_data = []
             twitter.friendships.create(screen_name=cmd_args[4])
